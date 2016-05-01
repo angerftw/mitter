@@ -137,7 +137,7 @@ class FormBuilder {
 						$data = (isset($oldData[$key]))? $oldData[$key] : null;
 
 						$name = mitterNameFixer($name, $repeat, $namePrefix, $num);
-						$this->generatedFields .= call_user_func(array($this, $subField['type']), $extraAttributes, $continious, $name, @$subField['title'], $subField, $data, $model)->render();
+						$this->generatedFields .= $this->getRowContent($subField['type'], $extraAttributes, $continious, $name, @$subField['title'], $subField, $data, $model);
 						continue;
 					}
 
@@ -168,14 +168,18 @@ class FormBuilder {
 				}
 
 				$name = mitterNameFixer($name, $repeat, $namePrefix, $num);
-				$this->generatedFields .= call_user_func(array($this, $subField['type']), $extraAttributes, $continious, $name, @$subField['title'], $subField, $data, $model)->render();
+				$this->generatedFields .= $this->getRowContent($subField['type'], $extraAttributes, $continious, $name, @$subField['title'], $subField, $data, $model);
 			}
 		} else {
 			$name = mitterNameFixer($name, $repeat, null, $num);
-			$this->generatedFields .= call_user_func(array($this, $field['type']), $extraAttributes, $continious, $name, $field['title'], $field, $oldData, $model)->render();
+			$this->generatedFields .= $this->getRowContent($field['type'],$extraAttributes, $continious, $name, $field['title'], $field, $oldData, $model);
 		}
 	}
 
+	public function getRowContent($type,$extraAttributes, $continious, $name, $title, $field, $oldData, $model)
+	{
+		return call_user_func(array($this, $type), $extraAttributes, $continious, $name, $title, $field, $oldData, $model)->render();
+	}
 	private function ajaxGuess($extraAttributes, $continious, $name, $title, $field, $oldData = null, $model = null, $createNew = false)
 	{
 		$default = "";
