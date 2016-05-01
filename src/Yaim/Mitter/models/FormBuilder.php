@@ -11,6 +11,20 @@ class FormBuilder {
 	protected $oldData = null;
 	protected $isDeleted;
 
+	/**
+	 * The types of inputs to not fill values on by default.
+	 *
+	 * @var array
+	 */
+	protected $skipValueTypes = ['file', 'password', 'checkbox', 'radio'];
+
+	/**
+	 * default class for input
+	 *
+	 * @var mixed
+	 */
+	protected $defaultClass = ' form-horizontal row-border form-control';
+
 	public function __construct($structure, $apiController = null, $oldData = null, $id = null )
 	{
 		// @todo: find a way to get rid of this dummy hack fix
@@ -61,7 +75,7 @@ class FormBuilder {
 		}
 
 		$prefix = (isset($this->structure['apiPrefix'])) ? $this->structure['apiPrefix'] : '';
-		
+
 		return str_replace('//', '/', $prefix.$api);
 	}
 
@@ -150,7 +164,7 @@ class FormBuilder {
 							$data = $oldData[$name];
 
 							//Dummy Hack Fix For Poly Morphic Ajax Guess start
-							
+
 							if (strpos($name, "_type")) {
 								$inputIdName = explode("_type", $name);
 								$inputIdName = $inputIdName[0]."_id";
@@ -217,7 +231,7 @@ class FormBuilder {
 		$minimum = (isset($minimum)) ? $minimum : 1;
 
 		/*
-			// @todo create a conditional ajaxGuess for Polyrophic Relations 
+			// @todo create a conditional ajaxGuess for Polyrophic Relations
 
 			$conditional = "";
 
@@ -500,5 +514,133 @@ class FormBuilder {
 		$width = (!isset($width))? 12 : $width;
 
 		return View::make('mitter::partials.time', compact('width', 'oldData', 'name', 'title'));
+	}
+
+	/**
+	 * Create a form input field.
+	 *
+	 * @param  string $type
+	 * @param  string $name
+	 * @param  string $value
+	 * @param  array $options
+	 *
+	 * @param int $width
+	 * @return \Illuminate\Support\HtmlString
+	 */
+	public function input($type, $name, $value = null, $options = [], $width = 12)
+	{
+		if (!isset($options['name'])) {
+			$options['name'] = $name;
+		}
+
+		$id = $this->getIdAttribute($name, $options);
+
+		if (! in_array($type, $this->skipValueTypes)) {
+			$value = $this->getValueAttribute($name, $value);
+		}
+
+		$merge = compact('type', 'value', 'id');
+
+		if(!isset($options['class']))
+		{
+			$options['class'] = '';
+		}
+		$options['class'] .= $this->defaultClass;
+
+		$options = array_merge($options, $merge);
+
+		return "<div class='col-sm-{{$width}}'><input {$this->attributes($options)} /></div>";
+	}
+
+	/**
+	 * Get the value that should be assigned to the field.
+	 *
+	 * @param  string $name
+	 * @param  string $value
+	 *
+	 * @return mixed
+	 */
+	public function getValueAttribute($name, $value = null)
+	{
+		if (is_null($name)) {
+			return $value;
+		}
+
+		if (! is_null(old($name))) {
+			return old($name);
+		}
+
+		if (! is_null($value)) {
+			return $value;
+		}
+
+	}
+
+	/**
+	 * Transform key from array to dot syntax.
+	 *
+	 * @param  string $key
+	 *
+	 * @return mixed
+	 */
+	protected function transformKey($key)
+	{
+		return str_replace(['.', '[]', '[', ']'], ['_', '', '.', ''], $key);
+	}
+
+	/**
+	 * Get the ID attribute for a field name.
+	 *
+	 * @param  string $name
+	 * @param  array  $attributes
+	 *
+	 * @return string
+	 */
+	public function getIdAttribute($name, $attributes)
+	{
+		if (array_key_exists('id', $attributes)) {
+			return $attributes['id'];
+		}
+		return $name;
+	}
+	/**
+	 * Build an HTML attribute string from an array.
+	 *
+	 * @param array $attributes
+	 *
+	 * @return string
+	 */
+	public function attributes($attributes)
+	{
+		$html = [];
+
+		foreach ((array) $attributes as $key => $value) {
+			$element = $this->attributeElement($key, $value);
+
+			if (! is_null($element)) {
+				$html[] = $element;
+			}
+		}
+
+		return count($html) > 0 ? ' ' . implode(' ', $html) : '';
+	}
+
+	/**
+	 * Build a single attribute element.
+	 *
+	 * @param string $key
+	 * @param string $value
+	 *
+	 * @return string
+	 */
+	protected function attributeElement($key, $value)
+	{
+		if (is_numeric($key)) {
+			$key = $value;
+		}
+
+		if (! is_null($value)) {
+			return $key . '="' . e($value) . '"';
+		}
 	}
 }
