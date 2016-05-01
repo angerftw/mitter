@@ -1,4 +1,4 @@
-@extends('layouts.row')
+@extends('mitter::layouts.row')
 @section('row-content')
 	<input type='hidden' name='{{$name}}'/>
 	<div class='col-sm-{{$width}}' data-groupkey='{{$key}}'>

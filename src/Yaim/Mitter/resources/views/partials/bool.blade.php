@@ -1,4 +1,4 @@
-@extends('layouts.row')
+@extends('mitter::layouts.row')
 @section('row-content')
 	<div class='col-sm-{{$width}}'>
 		<label class='checkbox-inline'>
