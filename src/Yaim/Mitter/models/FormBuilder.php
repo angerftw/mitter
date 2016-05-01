@@ -201,6 +201,10 @@ class FormBuilder {
 	public function getRowContent($type,$extraAttributes, $continious, $name, $title, $field, $oldData, $model)
 	{
 		$content = $this->{$type}($name, $title, $field, $oldData, $model);
+		if($type == 'hidden')
+		{
+			return $content;
+		}
 		return view('mitter::layouts.row',compact(['extraAttributes','name','content','continious','title']))->render();
 	}
 
@@ -332,32 +336,6 @@ class FormBuilder {
 		return View::make('mitter::partials.divider', compact('title'));
 	}
 
-	private function editor($name, $title, $field, $oldData = "")
-	{
-		extract($field);
-
-		$width = (!isset($width))? 12 : $width;
-
-		return View::make('mitter::partials.editor', compact('width', 'name', 'title', 'oldData'));
-	}
-
-	private function hidden($name, $title = null, $field, $oldData = null)
-	{
-		extract($field);
-
-		if(is_array($oldData)) {
-			if(isset($oldData['id'])) {
-				$relationName = explode('[',$name)[0];
-				$relationEditLink = $this->getSelfModel()->$relationName->find($oldData['id'])->getEditUrl();
-			}
-
-			$nameField = (isset($field['name_field']))? $field['name_field'] : 'name';
-			$oldData = (isset($oldData[$nameField]))? $oldData[$nameField] : '';
-		}
-
-		return View::make('mitter::partials.hidden', compact('oldData', 'title'));
-	}
-
 	private function image($name, $title, $field, $oldData = null)
 	{
 		extract($field);
@@ -425,21 +403,6 @@ class FormBuilder {
 		return View::make('mitter::partials.locked', compact('relationEditLink', 'width', 'oldData', 'title'));
 	}
 
-	private function password($name, $title, $field, $oldData = null)
-	{
-		return;
-		extract($field);
-
-		if(is_array($oldData)) {
-			$nameField = (isset($field['name_field']))? $field['name_field'] : 'name';
-			$oldData = (isset($oldData[$nameField]))? $oldData[$nameField] : '';
-		}
-
-		$width = (!isset($width))? 12 : $width;
-
-		return View::make('mitter::partials.password', compact('width', 'oldData', 'name', 'title'));
-	}
-
 	private function select($name, $title, $field, $oldData = null)
 	{
 		if (strpos($name, "_type") && strpos($name, "[")) {
@@ -458,18 +421,30 @@ class FormBuilder {
 		return View::make('mitter::partials.select', compact('width', 'name', 'field', 'selected', 'oldData'));
 	}
 
-	private function text($name, $title, $field, $oldData = null)
+	public function password($name, $title, $field, $oldData = null)
 	{
 		extract($field);
-
-		if(is_array($oldData)) {
-			$nameField = (isset($field['name_field']))? $field['name_field'] : 'name';
-			$oldData = (isset($oldData[$nameField]))? $oldData[$nameField] : '';
-		}
-
 		$width = (!isset($width))? 12 : $width;
+		return $this->input('password',$name,null,[],$width);
+	}
 
-		return View::make('mitter::partials.text', compact('width', 'oldData', 'name', 'title'));
+	public function hidden($name, $title = null, $field, $oldData = null)
+	{
+		return $this->input('hidden', $name, null, []);
+	}
+
+	public function text($name, $title, $field, $oldData = null)
+	{
+		extract($field);
+		$width = (!isset($width))? 12 : $width;
+		return $this->input('text',$name,null,[],$width);
+	}
+
+	private function editor($name, $title, $field, $oldData = "")
+	{
+		extract($field);
+		$width = (!isset($width))? 12 : $width;
+		return $this->textarea('text',$name,null,['class'=>'ckeditor','placeholder'=>$title,'cols'=>50,'rows'=>5],$width);
 	}
 
 	private function textarea($name, $title, $field, $oldData = "")
