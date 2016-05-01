@@ -46,6 +46,11 @@ class FormBuilder {
 		$this->isDeleted = (isset($oldData['deleted_at'])) ? true : false;
 		$this->id = $id;
 
+	}
+
+	public function get()
+	{
+		$structure = $this->structure;
 		if (isset($structure['self'])) {
 			$this->formContent($structure['self']);
 		}
@@ -53,10 +58,6 @@ class FormBuilder {
 		if (isset($structure['relations'])) {
 			$this->formContent($structure['relations']);
 		}
-	}
-
-	public function get()
-	{
 		return $this->__toString();
 	}
 
