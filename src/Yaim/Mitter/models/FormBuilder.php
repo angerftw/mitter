@@ -444,16 +444,7 @@ class FormBuilder {
 	{
 		extract($field);
 		$width = (!isset($width))? 12 : $width;
-		return $this->textarea('text',$name,null,['class'=>'ckeditor','placeholder'=>$title,'cols'=>50,'rows'=>5],$width);
-	}
-
-	private function textarea($name, $title, $field, $oldData = "")
-	{
-		extract($field);
-
-		$width = (!isset($width))? 12 : $width;
-
-		return View::make('mitter::partials.textarea', compact('width', 'name', 'title', 'oldData'));
+		return $this->textarea($name, null, ['class' => 'ckeditor', 'placeholder' => $title, 'cols' => 50, 'rows' => 5], $width);
 	}
 
 	private function date($name, $title, $field, $oldData = null)
@@ -476,6 +467,72 @@ class FormBuilder {
 		extract($field);
 		$width = (!isset($width))? 12 : $width;
 		return $this->input('text', $name, null, ['data-timePicker'], $width);
+	}
+
+	/**
+	 * Create a textarea input field.
+	 *
+	 * @param  string $name
+	 * @param  string $value
+	 * @param  array $options
+	 *
+	 * @param $width
+	 * @return \Illuminate\Support\HtmlString
+	 */
+	public function textarea($name, $value = null, $options = [], $width)
+	{
+		if (! isset($options['name'])) {
+			$options['name'] = $name;
+		}
+
+		$options = $this->setTextAreaSize($options);
+
+		$options['id'] = $this->getIdAttribute($name, $options);
+
+		$value = e((string) $this->getValueAttribute($name, $value));
+
+		unset($options['size']);
+
+		$options = $this->attributes($options);
+
+		return "<div class='col-sm-{{$width}}'><textarea {$options}> {$value} </textarea></div>";
+	}
+
+	/**
+	 * Set the text area size on the attributes.
+	 *
+	 * @param  array $options
+	 *
+	 * @return array
+	 */
+	protected function setTextAreaSize($options)
+	{
+		if (isset($options['size'])) {
+			return $this->setQuickTextAreaSize($options);
+		}
+
+		// If the "size" attribute was not specified, we will just look for the regular
+		// columns and rows attributes, using sane defaults if these do not exist on
+		// the attributes array. We'll then return this entire options array back.
+		$cols = array_get($options, 'cols', 50);
+
+		$rows = array_get($options, 'rows', 10);
+
+		return array_merge($options, compact('cols', 'rows'));
+	}
+
+	/**
+	 * Set the text area size using the quick "size" attribute.
+	 *
+	 * @param  array $options
+	 *
+	 * @return array
+	 */
+	protected function setQuickTextAreaSize($options)
+	{
+		$segments = explode('x', $options['size']);
+
+		return array_merge($options, ['cols' => $segments[0], 'rows' => $segments[1]]);
 	}
 
 	/**
