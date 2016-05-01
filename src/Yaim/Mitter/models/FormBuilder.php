@@ -200,7 +200,7 @@ class FormBuilder {
 
 	public function getRowContent($type,$extraAttributes, $continious, $name, $title, $field, $oldData, $model)
 	{
-		$content = $this->{$type}($name, $title, $field, $oldData, $model)->render();
+		$content = $this->{$type}($name, $title, $field, $oldData, $model);
 		return view('mitter::layouts.row',compact(['extraAttributes','name','content','continious','title']))->render();
 	}
 
@@ -239,16 +239,16 @@ class FormBuilder {
 		$minimum = (isset($minimum)) ? $minimum : 1;
 
 		/*
-			// @todo create a conditional ajaxGuess for Polyrophic Relations
+            // @todo create a conditional ajaxGuess for Polyrophic Relations
 
-			$conditional = "";
+            $conditional = "";
 
-			if(isset($field['conditional']))
-			{
-				if($field['conditional'])
-					$conditional = "data-conditional";
-			}
-		*/
+            if(isset($field['conditional']))
+            {
+                if($field['conditional'])
+                    $conditional = "data-conditional";
+            }
+        */
 
 		$api = $this->getPreFixedAPI($api);
 		$attributes = "data-selectAjax";
@@ -325,35 +325,6 @@ class FormBuilder {
 		$width = (!isset($width))? 12 : $width;
 
 		return View::make('mitter::partials.bool', compact('width', 'name', 'checked', 'title'));
-	}
-
-	private function date($name, $title, $field, $oldData = null)
-	{
-		extract($field);
-
-		if(is_array($oldData)) {
-			$nameField = (isset($field['name_field']))? $field['name_field'] : 'name';
-			$oldData = (isset($oldData[$nameField]))? $oldData[$nameField] : '';
-		}
-
-		$width = (!isset($width))? 12 : $width;
-
-		return View::make('mitter::partials.date', compact('width', 'oldData', 'name', 'title'));
-	}
-
-	private function dateTime($name, $title, $field, $oldData = null)
-	{
-		extract($field);
-		$default = (@$default) ? "data-default" : "";
-
-		if(is_array($oldData)) {
-			$nameField = (isset($field['name_field']))? $field['name_field'] : 'name';
-			$oldData = (isset($oldData[$nameField]))? $oldData[$nameField] : '';
-		}
-
-		$width = (!isset($width))? 12 : $width;
-
-		return View::make('mitter::partials.dateTime', compact('width', 'oldData', 'name', 'title', 'default'));
 	}
 
 	private function divider($title)
@@ -510,18 +481,26 @@ class FormBuilder {
 		return View::make('mitter::partials.textarea', compact('width', 'name', 'title', 'oldData'));
 	}
 
+	private function date($name, $title, $field, $oldData = null)
+	{
+		extract($field);
+		$width = (!isset($width))? 12 : $width;
+		return $this->input('text', $name, null, ['data-datePicker'], $width);
+	}
+
+	private function dateTime($name, $title, $field, $oldData = null)
+	{
+		extract($field);
+		$default = (@$default) ? "data-default" : "";
+		$width = (!isset($width))? 12 : $width;
+		return $this->input('text', $name, null, ['data-dateTimePicker', $default], $width);
+	}
+
 	private function time($name, $title, $field, $oldData = null)
 	{
 		extract($field);
-
-		if(is_array($oldData)) {
-			$nameField = (isset($field['name_field']))? $field['name_field'] : 'name';
-			$oldData = (isset($oldData[$nameField]))? $oldData[$nameField] : '';
-		}
-
 		$width = (!isset($width))? 12 : $width;
-
-		return View::make('mitter::partials.time', compact('width', 'oldData', 'name', 'title'));
+		return $this->input('text', $name, null, ['data-timePicker'], $width);
 	}
 
 	/**
