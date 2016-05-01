@@ -19,6 +19,13 @@ class FormBuilder {
 	protected $skipValueTypes = ['file', 'password', 'checkbox', 'radio'];
 
 	/**
+	 * The current model instance for the form.
+	 *
+	 * @var mixed
+	 */
+	protected $model;
+
+	/**
 	 * default class for input
 	 *
 	 * @var mixed
@@ -574,6 +581,43 @@ class FormBuilder {
 			return $value;
 		}
 
+		if (isset($this->model)) {
+			return $this->getModelValueAttribute($name);
+		}
+	}
+
+	/**
+	 * Get the model value that should be assigned to the field.
+	 *
+	 * @param  string $name
+	 *
+	 * @return mixed
+	 */
+	protected function getModelValueAttribute($name)
+	{
+		if (method_exists($this->model, 'getFormValue')) {
+			return $this->model->getFormValue($name);
+		}
+
+		return data_get($this->model, $this->transformKey($name));
+	}
+
+	/**
+	 * @param mixed $model
+	 * @return FormBuilder
+	 */
+	public function setModel($model)
+	{
+		$this->model = $model;
+		return $this;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getModel()
+	{
+		return $this->model;
 	}
 
 	/**
