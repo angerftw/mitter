@@ -440,21 +440,21 @@ class FormBuilder {
 		return $this->input('text',$name,null,[],$width);
 	}
 
-	private function editor($name, $title, $field, $oldData = "")
+	public function editor($name, $title, $field, $oldData = "")
 	{
 		extract($field);
 		$width = (!isset($width))? 12 : $width;
 		return $this->textarea($name, null, ['class' => 'ckeditor', 'placeholder' => $title, 'cols' => 50, 'rows' => 5], $width);
 	}
 
-	private function date($name, $title, $field, $oldData = null)
+	public function date($name, $title, $field, $oldData = null)
 	{
 		extract($field);
 		$width = (!isset($width))? 12 : $width;
 		return $this->input('text', $name, null, ['data-datePicker'], $width);
 	}
 
-	private function dateTime($name, $title, $field, $oldData = null)
+	public function dateTime($name, $title, $field, $oldData = null)
 	{
 		extract($field);
 		$default = (@$default) ? "data-default" : "";
@@ -462,7 +462,7 @@ class FormBuilder {
 		return $this->input('text', $name, null, ['data-dateTimePicker', $default], $width);
 	}
 
-	private function time($name, $title, $field, $oldData = null)
+	public function time($name, $title, $field, $oldData = null)
 	{
 		extract($field);
 		$width = (!isset($width))? 12 : $width;
