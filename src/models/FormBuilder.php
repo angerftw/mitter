@@ -26,13 +26,14 @@ class FormBuilder {
 		$isDeleted = $this->isDeleted;
 		$id = $this->id;
 		$generatedFields = $this->generatedFields;
+		$model = $this->getSelfModel();
 		if (isset($structure['self'])) {
 			$this->formContent($structure['self']);
 		}
 		if (isset($structure['relations'])) {
 			$this->formContent($structure['relations']);
 		}
-		return View::make('mitter::layouts.form', compact('structure', 'isDeleted', 'id', 'generatedFields'))->render().'';
+		return View::make('mitter::layouts.form', compact('structure', 'isDeleted', 'id', 'generatedFields', 'model'))->render().'';
 	}
 
 	public function __toString()
