@@ -1,5 +1,5 @@
 <?php
-
+use Yaim\Mitter\ApiController;
 // setup routes 
 if (config('mitter.route.useMitterRoutes')) {
 
@@ -43,3 +43,26 @@ if (config('mitter.route.useMitterRoutes')) {
     });
 }
 
+
+if (config('mitter.api.useMitterRoutes', true)) {
+
+    Route::group(config('mitter.api.routeGroupConfig', []), function () {
+
+        Route::get('{model}/{action?}', function ($model, $action = null) {
+
+            if (config("mitter.api.aliases.{$model}")) {
+                $model = config("mitter.api.aliases.{$model}");
+            } elseif (config("mitter.api.usePanelModelsAliases") && config("mitter.models.aliases.{$model}")) {
+                $model = config("mitter.models.aliases.{$model}");
+            } else {
+                abort(404);
+            }
+            $request = request();
+            $model = app($model);
+            $action = studly_case($action);
+            $api = new ApiController($model, $action, config('mitter.api', []));
+            return $api->get($request->q, $request->page);
+        });
+
+    });
+}

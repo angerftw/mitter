@@ -1,21 +1,40 @@
 <?php
 
 return [
-    'routes' => [
-        'panelPrefix' => 'admin',
-        'apiPrefix' => 'admin/api/',
-        'modelAliases' => [
-            "users" => \App\User::class,
-        ],
 
+    'route' => [
+        'useMitterRoutes' => true,
         'routeGroupConfig' => [
             'middleware' => 'web',
             'prefix' => 'admin',
-            'namespace' => '\\Yami\\Mitter\\',
-        ]
+            'namespace' => '\Yaim\Mitter',
+        ],
+    ],
+
+    'models' => [
+
+        'aliases' => [
+            "users" => \App\User::class,
+        ],
+
     ],
 
     'views' => [
-        'index' => 'layouts.index',
-    ]
+        'index' => 'index',
+        'form' => 'form',
+    ],
+
+    'api' => [
+        'useMitterRoutes' => true,
+        'usePanelModelsAliases' => true,
+        'defaultAction' => 'get',
+        'useBasicDataFromModel' => true,
+        'routeGroupConfig' => [
+            'middleware' => 'web',
+            'prefix' => 'api'
+        ],
+        'aliases' => [
+            "user" => \App\User::class,
+        ],
+    ],
 ];
