@@ -24,8 +24,11 @@ class BaseController extends Controller {
 	 */
 	public function index($model)
 	{
+		// get model instance
 		$model =  $this->getModel($model);
+		// render table
 		$table = view('mitter::layouts.table', $model->renderTable())->render();
+		// view file
 		$viewFile = $model->indexView ?: config('mitter.views.index');
 
 		return view($viewFile, compact('table'));
@@ -35,29 +38,27 @@ class BaseController extends Controller {
 	/**
 	 * Show the form for creating a new resource.
 	 *
+	 * @param $model
 	 * @return View
 	 */
-	public function create()
+	public function create($model)
 	{
-		$html = new FormBuilder($this->structure, $this->apiController);
-		$form = $html->get();
-
-		return \View::make($this->view['create'])->with('form', $form);
+		return $this->edit($model, null);
 	}
 
 
 	/**
 	 * Store a newly created resource in storage.
 	 *
+	 * @param Model $model
 	 * @return Redirect
 	 */
-	public function store()
+	public function store($model)
 	{
-		$model = new FormSaver($this->structure, \Input::all(), $this->nodeModel);
-		$id = $model->getModel()->id;
-
-		$url = action($this->structure['controller']."@edit", ['id' => $id]);
-		return \Redirect::to($url);
+		$request = request();
+		$model = $this->getModel($model);
+		$model = new FormSaver($model->structure, $request->all(), $model->nodeModel);
+		return redirect($model->getEditAction());
 
 	}
 
@@ -65,78 +66,82 @@ class BaseController extends Controller {
 	/**
 	 * Display the specified resource.
 	 *
-	 * @param  int  $id
+	 * @param $model
+	 * @param  int $id
 	 * @return Redirect
 	 */
-	public function show($id)
+	public function show($model, $id)
 	{
-		$url = action($this->structure['controller']."@edit", ['id' => $id]);
-		return \Redirect::to($url);
+		$model = $this->getModel($model, $id);
+		return redirect($model->getEditAction());
 	}
 
 
 	/**
 	 * Show the form for editing the specified resource.
 	 *
-	 * @param  int  $id
+	 * @param $model
+	 * @param  int $id
 	 * @return View
 	 */
-	public function edit($id)
+	public function edit($model, $id)
 	{
-		$relations = array();
+		$model = getMitterModelByAliasesName($model);
 
-		if (isset($this->structure['relations'])) {
-			foreach ($this->structure['relations'] as $key => $value) {
+		$relations = array();
+		if (isset($model->structure['relations'])) {
+			foreach ($model->structure['relations'] as $key => $value) {
 				if (isset($value['type'])) {
 					if ($value['type'] == 'divider') {
 						continue;
 					}
-				} 
+				}
 				$relations[] = $key;
 			}
 		}
 
-		$model = call_user_func(array($this->structure['model'], 'withTrashed'))->with($relations)->find($id);
+		$model = $model::withTrashed()->with($relations)->find($id);
 		$modelData = (isset($model))? $modelData = array_filter($model->revealHidden()->toArray(), 'mitterNullFilter') : null;
-		// $modelData = array_filter(call_user_func(array($this->structure['model'], 'withTrashed'))->with($relations)->find($id)->toArray());
 		if(!isset($modelData)) {
 			return \Response::view('errors.missing', array(), 404);
 		}
 
-		$html = new FormBuilder($this->structure, $this->apiController, $modelData, $id);
+		$html = new FormBuilder($model->structure, null, $modelData, $id);
 		$form = $html->get();
 
-		return \View::make($this->view['create'])->with('form', $form);
+		$viewFile = $model->FormView ?: config('mitter.views.form');
+		return view($viewFile, compact('form'));
 	}
 
 
 	/**
 	 * Update the specified resource in storage.
 	 *
-	 * @param  int  $id
+	 * @param $model
+	 * @param  int $id
 	 * @return Redirect
 	 */
-	public function update($id)
+	public function update($model, $id)
 	{
-		new FormSaver($this->structure, \Input::all(), $this->nodeModel);
-		return \Redirect::back();
+		$model = $this->getModel($model, $id);
+		new FormSaver($model->structure, \Input::all(), $model->nodeModel);
+		return redirect()->back();
 	}
 
 
 	/**
 	 * Remove the specified resource from storage.
-	 *
-	 * @param  int  $id
-	 * @return Redirect
+	 * @param Model $model
+	 * @return mixed
+	 * @throws \Exception
 	 */
-	public function destroy($id)
+	public function destroy($model, $id)
 	{
-		$model = call_user_func([$this->structure['model'], 'find'], $id);
-		$model->delete();
-
-		$url = action($this->structure['controller']."@index");
-
-		return \Redirect::to($url);
+		$model = $this->getModel($model, $id);
+		if ($model->delete()) {
+			return redirect($model->getIndexAction());
+		}
+		return back()->withErrors(['Sorry, but you are unable to delete the this entity.']);
 	}
 
 	/**
@@ -147,13 +152,13 @@ class BaseController extends Controller {
 	private function getModel($model, $id = null)
 	{
 		if (!$model instanceof Model) {
-			if (mitterHasModelAliases($model)) {
-				$model = mitterGetModelByAliasesName($model);
+			if (hasMitterModelAliases($model)) {
+				$model = getMitterModelByAliasesName($model);
 			}
 		}
 		if ($model instanceof Model) {
 			if ($id) {
-				$model = $model->findOrFail($id);
+				$model = $model->withTrashed()->where('id',$id)->first();
 			}
 			return $model;
 		}
