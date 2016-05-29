@@ -105,6 +105,7 @@ trait MitterDataTable
             $query = $this->datatableQuery();
         } else {
             $query = $this
+                ->withTrashed()
                 ->SearchByTerm(request('search'))
                 ->orderBy('id', 'desc');
         }
