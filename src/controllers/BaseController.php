@@ -86,7 +86,7 @@ class BaseController extends Controller {
 	 */
 	public function edit($model, $id)
 	{
-		$model = getMitterModelByAliasesName($model);
+		$model = mitterGetModelByAliasesName($model);
 
 		$relations = array();
 		if (isset($model->structure['relations'])) {
@@ -152,8 +152,8 @@ class BaseController extends Controller {
 	private function getModel($model, $id = null)
 	{
 		if (!$model instanceof Model) {
-			if (hasMitterModelAliases($model)) {
-				$model = getMitterModelByAliasesName($model);
+			if (mitterHasModelAliases($model)) {
+				$model = mitterGetModelByAliasesName($model);
 			}
 		}
 		if ($model instanceof Model) {
