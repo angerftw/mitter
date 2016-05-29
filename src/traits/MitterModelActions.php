@@ -1,23 +1,20 @@
-<?php
-
-namespace Yaim\Mitter;
-
+<?php namespace Yaim\Mitter;
 
 trait MitterModelActions
 {
     public function getIndexAction()
     {
-        return $this->getAction('index', false);
+        return $this->getAction('index');
     }
 
     public function getCreateAction()
     {
-        return $this->getAction('create', false);
+        return $this->getAction('create');
     }
 
     public function getStoreAction()
     {
-        return $this->getAction('store', false);
+        return $this->getAction('store');
     }
 
     public function getShowAction()
@@ -40,14 +37,10 @@ trait MitterModelActions
         return $this->getAction('destroy');
     }
 
-    public function getAction($actionName, $withModel = true)
+    public function getAction($actionName)
     {
-        if(!$this->controller)
-        {
-            $aliases = mitterGetAliasesByModelName(static::class);
-            $id = $withModel ? $this->id : null;
-            return action("\\Yaim\\Mitter\\BaseController@{$actionName}", ['model' => $aliases, 'id' => $id]);
-        }
-        return action("{$this->controller}@{$actionName}");
+        $aliases = getMitterAliasesByModelName(static::class);
+        $controller = $this->controller ?: "\\Yaim\\Mitter\\BaseController";
+        return action($controller . '@' . $actionName, ['model' => $aliases, 'id' => $this->id]);
     }
 }
