@@ -1,3 +1,1 @@
-<div class='col-sm-{{$width}}'>
-    <input class='form-horizontal row-border form-control' value='{{$oldData}}' name='{{$name}}' type='text' id='{{$name}}' placeholder='{{$title}}' data-dateTimePicker {{$default}} title='{{$title}}'>
-</div>
+<input type="text" name="{{$name}}" id="{{$name}}" class="row-border form-control {{$class}}" value="{{$value}}" placeholder="{{$title}}" title="{{$title}}" data-dateTimePicker/>

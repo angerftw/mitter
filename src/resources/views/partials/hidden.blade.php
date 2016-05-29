@@ -1,3 +1,1 @@
-<div class='hidden'>
-    <input value='{{$oldData}}' type='hidden' placeholder='{{$title}}'>
-</div>
+<input type="hidden" name="{{$name}}" id="{{$name}}" class="{{$class}}" value="{{$value}}"/>

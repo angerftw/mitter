@@ -20,48 +20,6 @@ class FormBuilder {
 		$this->id = $id;
 	}
 
-	public function get()
-	{
-		$structure = $this->structure;
-		$isDeleted = $this->isDeleted;
-		$id = $this->id;
-		$generatedFields = $this->generatedFields;
-		$model = $this->getSelfModel();
-		if (isset($structure['self'])) {
-			$this->formContent($structure['self']);
-		}
-		if (isset($structure['relations'])) {
-			$this->formContent($structure['relations']);
-		}
-		return View::make('mitter::layouts.form', compact('structure', 'isDeleted', 'id', 'generatedFields', 'model'))->render().'';
-	}
-
-	public function __toString()
-	{
-		return $this->get();
-	}
-
-	private function getPreFixedAPI($api)
-	{
-		if(strpos($api, '%')){
-			preg_match_all('~[%](.*?)[%]~', $api, $wildcards);
-
-			foreach ($wildcards[0] as $key => $wildcard) {
-				$replacable = @$this->getSelfModel()->$wildcards[1][$key];
-				$api = str_replace($wildcard, $replacable, $api);
-			}
-		}
-
-		$prefix = (isset($this->structure['apiPrefix'])) ? $this->structure['apiPrefix'] : '';
-
-		return str_replace('//', '/', $prefix.$api);
-	}
-
-	private function getSelfModel()
-	{
-		return call_user_func(array($this->structure['model'], 'find'), $this->id);
-	}
-
 	private function formContent($structure)
 	{
 		foreach ($structure as $name => $field) {
@@ -168,11 +126,98 @@ class FormBuilder {
 		}
 	}
 
-	public function getRowContent($type,$extraAttributes, $continuous, $name, $title, $field, $oldData, $model)
-	{
-		$content = $this->{$type}($name, $title, $field, $oldData, $model)->render();
-		return view('mitter::layouts.row',compact(['extraAttributes','name','content','continuous','title']))->render();
-	}
+    public function getRowContent($type, $extraAttributes, $continuous, $name, $title, $options, $value, $model)
+    {
+        $element = $this->{$type}($name, $value, $options, $model) . '';
+        if ($type == 'hidden') {
+            return $element;
+        }
+        $width = isset($options['width']) ? $options['width'] : 12;
+        return view('mitter::layouts.row', compact(['extraAttributes', 'name', 'element', 'continuous', 'title', 'width']))->render();
+    }
+
+    public function text($name, $value = null, $options = [])
+    {
+        return $this->getElement($name, $value, $options);
+    }
+
+    public function password($name, $value = null, $options = [])
+    {
+        return $this->getElement($name, $value, $options, 'password');
+    }
+
+    public function date($name, $value = null, $options = [])
+    {
+        return $this->getElement($name, $value, $options, 'date');
+    }
+
+    public function time($name, $value = null, $options = [])
+    {
+        return $this->getElement($name, $value, $options, 'time');
+    }
+
+    public function dateTime($name, $value = null, $options = [])
+    {
+        return $this->getElement($name, $value, $options, 'dateTime');
+    }
+
+    public function hidden($name, $value = null, $options = [])
+    {
+        return $this->getElement($name, $value, $options, 'hidden');
+    }
+
+    public function link($name, $value = null, $options = [])
+    {
+        return $this->getElement($name, $value, $options, 'link');
+    }
+
+    public function bool($name, $value = null, $options = [])
+    {
+        return $this->getElement($name, $value, $options, 'bool');
+    }
+
+    public function textarea($name, $value = null, $options = [])
+    {
+        return $this->getElement($name, $value, $options, 'textarea');
+    }
+
+    public function editor($name, $value = null, $options = [])
+    {
+        return $this->getElement($name, $value, $options, 'editor');
+    }
+
+    public function select($name, $value = null, $options)
+    {
+        return $this->getElement($name, $value, $options, 'select');
+    }
+
+    public function image($name, $value = null, $options)
+    {
+        return $this->getElement($name, $value, $options, 'image');
+    }
+
+    public function locked($name, $value = null, $options = [])
+    {
+        $relationEditLink = null;
+        if (is_array($value) and isset($value['id'])) {
+            $relationName = explode('[', $name)[0];
+            $relationEditLink = $this->getSelfModel()->{$relationName}->find($value['id'])->getEditUrl();
+        }
+        $options['link'] = $relationEditLink;
+        return $this->getElement($name, $value, $options, 'locked');
+    }
+
+    public function json($name, $value = null, $options)
+    {
+        $value = (is_array($value) || is_object($value)) ? json_encode($value) : $value;
+        $value = json_decode($value, true);
+        if (!$value) {
+            $value[str_random(16)] = null;
+            $options['new'] = true;
+        }
+        $options['col'] = @$options['col'] ?: 4;
+        return $this->getElement($name, $value, $options, 'json');
+    }
 
 	private function ajaxGuess($name, $title, $field, $oldData = null, $model = null, $createNew = false)
 	{
@@ -209,7 +254,7 @@ class FormBuilder {
 		$minimum = (isset($minimum)) ? $minimum : 1;
 
 		/*
-			// @todo create a conditional ajaxGuess for Polyrophic Relations 
+			// @todo create a conditional ajaxGuess for Polyrophic Relations
 
 			$conditional = "";
 
@@ -275,222 +320,100 @@ class FormBuilder {
 		$this->ajaxTag($name, $title, $field, $oldData, $createNew = true);
 	}
 
-	private function bool($name, $title, $field, $oldData = null)
+	public function divider($title)
 	{
-		$checked = "";
-
-		if (isset($oldData)) {
-			if ($oldData == 1) {
-				$checked = " checked='true' ";
-			}
-		} else {
-			if(isset($field['default'])) {
-				if ($field['default']) {
-					$checked = " checked='true' ";
-				}
-			}
-		}
-
-		extract($field);
-		$width = (!isset($width))? 12 : $width;
-
-		return View::make('mitter::partials.bool', compact('width', 'name', 'checked', 'title'));
+		return view('mitter::partials.divider', compact('title'));
 	}
 
-	private function date($name, $title, $field, $oldData = null)
+    /**
+     * Create a form element.
+     *
+     * @param $name
+     * @param null $value
+     * @param array $options
+     * @param string $type
+     * @return View
+     */
+    public function getElement($name, $value = null, $options = [], $type = 'text')
+    {
+        $value = $this->getValue($value, $options, $name);
+        $title = isset($options['title']) ? $options['title'] : '';
+
+        $class = isset($options['class']) ? $options['class'] : '';
+
+        return view("mitter::partials.{$type}", compact('value', 'name', 'title', 'class', 'options'));
+    }
+
+    /**
+     * get value from field
+     *
+     * @param $value
+     * @param $options
+     *
+     * @param $name
+     * @return mixed|string
+     */
+    private function getValue($value, $options, $name)
+    {
+        if (is_array($value)) {
+            $nameField = isset($options['name_field']) ? $options['name_field'] : 'name';
+            $value = isset($value[$nameField]) ? $value[$nameField] : $value;
+        }
+        if (is_string($name) and strpos($name, "_type") && strpos($name, "[")) {
+            preg_match('#\[(.*?)\]#', $name, $match);
+            $match = $match[1];
+            if (isset($this->oldData[$match])) {
+                return $this->oldData[$match];
+            }
+        }
+        return $value;
+    }
+
+	private function getPreFixedAPI($api)
 	{
-		extract($field);
+		if(strpos($api, '%')){
+			preg_match_all('~[%](.*?)[%]~', $api, $wildcards);
 
-		if(is_array($oldData)) {
-			$nameField = (isset($field['name_field']))? $field['name_field'] : 'name';
-			$oldData = (isset($oldData[$nameField]))? $oldData[$nameField] : '';
-		}
-
-		$width = (!isset($width))? 12 : $width;
-
-		return View::make('mitter::partials.date', compact('width', 'oldData', 'name', 'title'));
-	}
-
-	private function dateTime($name, $title, $field, $oldData = null)
-	{
-		extract($field);
-		$default = (@$default) ? "data-default" : "";
-
-		if(is_array($oldData)) {
-			$nameField = (isset($field['name_field']))? $field['name_field'] : 'name';
-			$oldData = (isset($oldData[$nameField]))? $oldData[$nameField] : '';
-		}
-
-		$width = (!isset($width))? 12 : $width;
-
-		return View::make('mitter::partials.dateTime', compact('width', 'oldData', 'name', 'title', 'default'));
-	}
-
-	private function divider($title)
-	{
-		return View::make('mitter::partials.divider', compact('title'));
-	}
-
-	private function editor($name, $title, $field, $oldData = "")
-	{
-		extract($field);
-
-		$width = (!isset($width))? 12 : $width;
-
-		return View::make('mitter::partials.editor', compact('width', 'name', 'title', 'oldData'));
-	}
-
-	private function hidden($name, $title = null, $field, $oldData = null)
-	{
-		extract($field);
-
-		if(is_array($oldData)) {
-			if(isset($oldData['id'])) {
-				$relationName = explode('[',$name)[0];
-				$relationEditLink = $this->getSelfModel()->$relationName->find($oldData['id'])->getEditUrl();
-			}
-
-			$nameField = (isset($field['name_field']))? $field['name_field'] : 'name';
-			$oldData = (isset($oldData[$nameField]))? $oldData[$nameField] : '';
-		}
-
-		return View::make('mitter::partials.hidden', compact('oldData', 'title'));
-	}
-
-	private function image($name, $title, $field, $oldData = null)
-	{
-		extract($field);
-
-		if(is_array($oldData)) {
-			$nameField = (isset($field['name_field']))? $field['name_field'] : 'name';
-			$oldData = (isset($oldData[$nameField]))? $oldData[$nameField] : '';
-		}
-
-		$width = (!isset($width))? 12 : $width;
-
-		if($oldData) {
-			$width = ($width >= 3)? $width-2 : 1;
-			$removeName = $name."[remove]";
-
-		}
-
-		return View::make('mitter::partials.image', compact('width', 'name', 'title', 'oldData', 'removeName'));
-	}
-
-	private function json($name, $title, $field, $oldData = null)
-	{
-		extract($field);
-		$width = (!isset($width))? 12 : $width;
-		$name = (isset($name)) ? $name : null;
-
-		$oldData = (is_array($oldData) || is_object($oldData)) ? json_encode($oldData) : $oldData;
-
-		if (isset($oldData) && !empty(json_decode($oldData))) {
-			$oldData = json_decode($oldData, true);
-			return View::make('mitter::partials.json.filled', compact('name', 'oldData', 'width', 'title', 'field'));
-		} else {
-			$key = str_random(16);
-			return View::make('mitter::partials.json.new', compact('name', 'width', 'key', 'title', 'field'));
-		}
-	}
-
-	private function link($name, $title, $field, $oldData = null)
-	{
-		$width = (!isset($width))? 12 : $width;
-
-		return View::make('mitter::partials.link', compact('oldData'));
-	}
-
-	private function locked($name, $title, $field, $oldData = null)
-	{
-		extract($field);
-
-		if(is_array($oldData)) {
-			if(isset($oldData['id'])) {
-				$relationName = explode('[',$name)[0];
-				$relationEditLink = $this->getSelfModel()->$relationName->find($oldData['id'])->getEditUrl();
-			}
-
-			$nameField = (isset($field['name_field']))? $field['name_field'] : 'name';
-			$oldData = (isset($oldData[$nameField]))? $oldData[$nameField] : '';
-		}
-
-		$width = (!isset($width))? 12 : $width;
-
-		if(isset($relationEditLink) && !empty(@$relationEditLink)) {
-			$width = (!isset($width))? 11 : $width-1;
-		}
-
-		return View::make('mitter::partials.locked', compact('relationEditLink', 'width', 'oldData', 'title'));
-	}
-
-	private function password($name, $title, $field, $oldData = null)
-	{
-		return;
-		extract($field);
-
-		if(is_array($oldData)) {
-			$nameField = (isset($field['name_field']))? $field['name_field'] : 'name';
-			$oldData = (isset($oldData[$nameField]))? $oldData[$nameField] : '';
-		}
-
-		$width = (!isset($width))? 12 : $width;
-
-		return View::make('mitter::partials.password', compact('width', 'oldData', 'name', 'title'));
-	}
-
-	private function select($name, $title, $field, $oldData = null)
-	{
-		if (strpos($name, "_type") && strpos($name, "[")) {
-			preg_match('#\[(.*?)\]#', $name, $match);
-			$match = $match[1];
-
-			if (isset($this->oldData[$match])) {
-				$oldData = $this->oldData[$match];
+			foreach ($wildcards[0] as $key => $wildcard) {
+				$replacable = @$this->getSelfModel()->$wildcards[1][$key];
+				$api = str_replace($wildcard, $replacable, $api);
 			}
 		}
 
-		extract($field);
+		$prefix = (isset($this->structure['apiPrefix'])) ? $this->structure['apiPrefix'] : '';
 
-		$width = (!isset($width))? 12 : $width;
-
-		return View::make('mitter::partials.select', compact('width', 'name', 'field', 'selected', 'oldData'));
+		return str_replace('//', '/', $prefix.$api);
 	}
 
-	private function text($name, $title, $field, $oldData = null)
+	private function getSelfModel()
 	{
-		extract($field);
+		return call_user_func(array($this->structure['model'], 'find'), $this->id);
+	}
 
-		if(is_array($oldData)) {
-			$nameField = (isset($field['name_field']))? $field['name_field'] : 'name';
-			$oldData = (isset($oldData[$nameField]))? $oldData[$nameField] : '';
+	/**
+	 * @return string form
+     */
+	public function get()
+	{
+		$structure = $this->structure;
+		$isDeleted = $this->isDeleted;
+		$id = $this->id;
+		$model = $this->getSelfModel();
+		if (isset($structure['self'])) {
+			$this->formContent($structure['self']);
 		}
-
-		$width = (!isset($width))? 12 : $width;
-
-		return View::make('mitter::partials.text', compact('width', 'oldData', 'name', 'title'));
-	}
-
-	private function textarea($name, $title, $field, $oldData = "")
-	{
-		extract($field);
-
-		$width = (!isset($width))? 12 : $width;
-
-		return View::make('mitter::partials.textarea', compact('width', 'name', 'title', 'oldData'));
-	}
-
-	private function time($name, $title, $field, $oldData = null)
-	{
-		extract($field);
-
-		if(is_array($oldData)) {
-			$nameField = (isset($field['name_field']))? $field['name_field'] : 'name';
-			$oldData = (isset($oldData[$nameField]))? $oldData[$nameField] : '';
+		if (isset($structure['relations'])) {
+			$this->formContent($structure['relations']);
 		}
+		$generatedFields = $this->generatedFields;
+		return View::make('mitter::layouts.form', compact('structure', 'isDeleted', 'id', 'generatedFields', 'model'))->render().'';
+	}
 
-		$width = (!isset($width))? 12 : $width;
-
-		return View::make('mitter::partials.time', compact('width', 'oldData', 'name', 'title'));
+	/**
+	 * @return string form
+	 */
+	public function __toString()
+	{
+		return $this->get();
 	}
 }
