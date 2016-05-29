@@ -13,12 +13,6 @@ class FormBuilder {
 
 	public function __construct($structure, $apiController = null, $oldData = null, $id = null )
 	{
-		// @todo: find a way to get rid of this dummy hack fix
-		$laravel = app();
-		if (0 === strpos($laravel::VERSION, '5.')) {
-			\URL::setRootControllerNamespace('');
-		}
-
 		$this->structure = $structure;
 		$this->apiController = $apiController;
 		$this->oldData = $oldData;
