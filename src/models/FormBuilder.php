@@ -40,7 +40,7 @@ class FormBuilder {
 		$id = $this->id;
 		$generatedFields = $this->generatedFields;
 
-		return View::make('mitter.layouts.form', compact('structure', 'isDeleted', 'id', 'generatedFields'))->render();
+		return View::make('mitter::layouts.form', compact('structure', 'isDeleted', 'id', 'generatedFields'))->render();
 	}
 
 	private function getPreFixedAPI($api)
@@ -229,7 +229,7 @@ class FormBuilder {
 			$width = (!isset($width))? 11 : $width - 1;
 		}
 
-		return View::make('mitter.partials.ajaxGuess', compact('extraAttributes', 'continious', 'relationEditLink', 'width', 'minimum', 'attributes', 'title', 'api', 'name', 'id', 'text'));
+		return View::make('mitter::partials.ajaxGuess', compact('extraAttributes', 'continious', 'relationEditLink', 'width', 'minimum', 'attributes', 'title', 'api', 'name', 'id', 'text'));
 	}
 
 	private function createAjaxGuess($extraAttributes, $continious, $name, $title, $field, $oldData = null, $model = null)
@@ -263,7 +263,7 @@ class FormBuilder {
 			$attributes .= " data-tags	='true'";
 		}
 
-		return View::make('mitter.partials.ajaxTag', compact('extraAttributes', 'continious', 'width', 'attributes', 'minimum', 'title', 'api', 'name', 'oldDataArray'));
+		return View::make('mitter::partials.ajaxTag', compact('extraAttributes', 'continious', 'width', 'attributes', 'minimum', 'title', 'api', 'name', 'oldDataArray'));
 	}
 
 	private function createAjaxTag($extraAttributes, $continious, $name, $title, $field, $oldData = null)
@@ -290,7 +290,7 @@ class FormBuilder {
 		extract($field);
 		$width = (!isset($width))? 12 : $width;
 
-		return View::make('mitter.partials.bool', compact('extraAttributes', 'continious', 'width', 'name', 'checked', 'title'));
+		return View::make('mitter::partials.bool', compact('extraAttributes', 'continious', 'width', 'name', 'checked', 'title'));
 	}
 
 	private function date($extraAttributes, $continious, $name, $title, $field, $oldData = null)
@@ -304,7 +304,7 @@ class FormBuilder {
 
 		$width = (!isset($width))? 12 : $width;
 
-		return View::make('mitter.partials.date', compact('extraAttributes', 'continious', 'width', 'oldData', 'name', 'title'));
+		return View::make('mitter::partials.date', compact('extraAttributes', 'continious', 'width', 'oldData', 'name', 'title'));
 	}
 
 	private function dateTime($extraAttributes, $continious, $name, $title, $field, $oldData = null)
@@ -319,12 +319,12 @@ class FormBuilder {
 
 		$width = (!isset($width))? 12 : $width;
 
-		return View::make('mitter.partials.dateTime', compact('extraAttributes', 'continious', 'width', 'oldData', 'name', 'title', 'default'));
+		return View::make('mitter::partials.dateTime', compact('extraAttributes', 'continious', 'width', 'oldData', 'name', 'title', 'default'));
 	}
 
 	private function divider($extraAttributes, $continious, $title)
 	{
-		return View::make('mitter.partials.divider', compact('extraAttributes', 'continious', 'title'));
+		return View::make('mitter::partials.divider', compact('extraAttributes', 'continious', 'title'));
 	}
 
 	private function editor($extraAttributes, $continious, $name, $title, $field, $oldData = "")
@@ -333,7 +333,7 @@ class FormBuilder {
 
 		$width = (!isset($width))? 12 : $width;
 
-		return View::make('mitter.partials.editor', compact('extraAttributes', 'continious', 'width', 'name', 'title', 'oldData'));
+		return View::make('mitter::partials.editor', compact('extraAttributes', 'continious', 'width', 'name', 'title', 'oldData'));
 	}
 
 	private function hidden($extraAttributes, $continious, $name, $title = null, $field, $oldData = null)
@@ -350,7 +350,7 @@ class FormBuilder {
 			$oldData = (isset($oldData[$nameField]))? $oldData[$nameField] : '';
 		}
 
-		return View::make('mitter.partials.hidden', compact('extraAttributes', 'continious', 'oldData', 'title'));
+		return View::make('mitter::partials.hidden', compact('extraAttributes', 'continious', 'oldData', 'title'));
 	}
 
 	private function image($extraAttributes, $continious, $name, $title, $field, $oldData = null)
@@ -394,7 +394,7 @@ class FormBuilder {
 	{
 		$width = (!isset($width))? 12 : $width;
 
-		return View::make('mitter.partials.link', compact('extraAttributes', 'continious', 'oldData'));
+		return View::make('mitter::partials.link', compact('extraAttributes', 'continious', 'oldData'));
 	}
 
 	private function locked($extraAttributes, $continious, $name, $title, $field, $oldData = null)
@@ -417,7 +417,7 @@ class FormBuilder {
 			$width = (!isset($width))? 11 : $width-1;
 		}
 
-		return View::make('mitter.partials.locked', compact('extraAttributes', 'continious', 'relationEditLink', 'width', 'oldData', 'title'));
+		return View::make('mitter::partials.locked', compact('extraAttributes', 'continious', 'relationEditLink', 'width', 'oldData', 'title'));
 	}
 
 	private function password($extraAttributes, $continious, $name, $title, $field, $oldData = null)
@@ -432,7 +432,7 @@ class FormBuilder {
 
 		$width = (!isset($width))? 12 : $width;
 
-		return View::make('mitter.partials.password', compact('extraAttributes', 'continious', 'width', 'oldData', 'name', 'title'));
+		return View::make('mitter::partials.password', compact('extraAttributes', 'continious', 'width', 'oldData', 'name', 'title'));
 	}
 
 	private function select($extraAttributes, $continious, $name, $title, $field, $oldData = null)
@@ -450,7 +450,7 @@ class FormBuilder {
 
 		$width = (!isset($width))? 12 : $width;
 
-		return View::make('mitter.partials.select', compact('extraAttributes', 'continious', 'width', 'name', 'field', 'selected', 'oldData'));
+		return View::make('mitter::partials.select', compact('extraAttributes', 'continious', 'width', 'name', 'field', 'selected', 'oldData'));
 	}
 
 	private function text($extraAttributes, $continious, $name, $title, $field, $oldData = null)
@@ -464,7 +464,7 @@ class FormBuilder {
 
 		$width = (!isset($width))? 12 : $width;
 
-		return View::make('mitter.partials.text', compact('extraAttributes', 'continious', 'width', 'oldData', 'name', 'title'));
+		return View::make('mitter::partials.text', compact('extraAttributes', 'continious', 'width', 'oldData', 'name', 'title'));
 	}
 
 	private function textarea($extraAttributes, $continious, $name, $title, $field, $oldData = "")
@@ -473,7 +473,7 @@ class FormBuilder {
 
 		$width = (!isset($width))? 12 : $width;
 
-		return View::make('mitter.partials.textarea', compact('extraAttributes', 'continious', 'width', 'name', 'title', 'oldData'));
+		return View::make('mitter::partials.textarea', compact('extraAttributes', 'continious', 'width', 'name', 'title', 'oldData'));
 	}
 
 	private function time($extraAttributes, $continious, $name, $title, $field, $oldData = null)
@@ -487,6 +487,6 @@ class FormBuilder {
 
 		$width = (!isset($width))? 12 : $width;
 
-		return View::make('mitter.partials.time', compact('extraAttributes', 'continious', 'width', 'oldData', 'name', 'title'));
+		return View::make('mitter::partials.time', compact('extraAttributes', 'continious', 'width', 'oldData', 'name', 'title'));
 	}
 }

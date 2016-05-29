@@ -1,4 +1,4 @@
-@extends('layouts.row')
+@extends('layouts::row')
 @section('row-content')
 	@if(isset($relationEditLink) && !empty(@$relationEditLink))
 		<div class='col-sm-{{$width}} col-xs-11'>

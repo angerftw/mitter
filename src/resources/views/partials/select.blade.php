@@ -1,4 +1,4 @@
-@extends('layouts.row')
+@extends('layouts::row')
 @section('row-content')
 	<div class='col-sm-{{$width}}'>
 		<select id='{{$name}}' class='form-control' name='{{$name}}'>

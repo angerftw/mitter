@@ -1,4 +1,4 @@
-@extends('layouts.row')
+@extends('layouts::row')
 @section('row-content')
 	<input type='hidden' name='{{$name}}'/>
 	@foreach ($oldData as $key => $data)
@@ -13,16 +13,16 @@
 				<div class='box-body'>
 				@if(isset($field['manualKey'])) {
 					@if($field['manualKey'] == true)
-						<input class='form-horizontal row-border form-control' value='{{$key}}' name='{{$name}}"."[{{$key}}][arraykey]' type='text' id='{{$name}}' placeholder='{{$title}} Key' />
+						<input class='form-horizontal row-border form-control' value='{{$key}}' name='{{$name}}"::"[{{$key}}][arraykey]' type='text' id='{{$name}}' placeholder='{{$title}} Key' />
 					@endif
 				@endif
 				@if(isset($field['fields']))
 					@foreach ($field['fields'] as $fieldName => $fieldTitle)
 						<?php $fieldValue = isset($data[$fieldName]) ? $data[$fieldName] : '' ?>
-						<input class='form-horizontal row-border form-control' value='{{$fieldValue}}' name='{{$name}}"."[{{$key}}][{{$fieldName}}]' type='text' id='{{$name}}' placeholder='{{$title}} {{$fieldTitle}}' />
+						<input class='form-horizontal row-border form-control' value='{{$fieldValue}}' name='{{$name}}"::"[{{$key}}][{{$fieldName}}]' type='text' id='{{$name}}' placeholder='{{$title}} {{$fieldTitle}}' />
 					@endforeach
 				@else
-					<input class='form-horizontal row-border form-control' value='{{$data}}' name='{{$name}}"."[{{$key}}][arrayvalue]' type='text' id='{{$name}}' placeholder='{{$title}} Value' />
+					<input class='form-horizontal row-border form-control' value='{{$data}}' name='{{$name}}"::"[{{$key}}][arrayvalue]' type='text' id='{{$name}}' placeholder='{{$title}} Value' />
 				@endif
 				</div>
 			</div>

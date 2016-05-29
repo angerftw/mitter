@@ -1,4 +1,4 @@
-@extends('layouts.row')
+@extends('layouts::row')
 @section('row-content')
 	<div class='col-sm-{{$width}}'>
 		<select {{$attributes}} data-minimum-input-length='{{$minimum}}' data-placeholder='{{$title}}' data-allow-clear='true' data-ajax--url='{{$api}}' data-ajax--data-type='json' data-ajax--type='GET' data-ajax--quiet-millis='50' multiple='multiple' name='{{$name}}' id='{{$name}}' data-api='{{$api}}' placeholder='{{$title}}'>
