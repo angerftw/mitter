@@ -18,29 +18,26 @@ class FormBuilder {
 		$this->oldData = $oldData;
 		$this->isDeleted = (isset($oldData['deleted_at'])) ? true : false;
 		$this->id = $id;
-
-		if (isset($structure['self'])) {
-			$this->formContent($structure['self']);
-		}
-
-		if (isset($structure['relations'])) {
-			$this->formContent($structure['relations']);
-		}
 	}
 
 	public function get()
-	{
-		return $this->__toString();
-	}
-
-	public function __toString()
 	{
 		$structure = $this->structure;
 		$isDeleted = $this->isDeleted;
 		$id = $this->id;
 		$generatedFields = $this->generatedFields;
+		if (isset($structure['self'])) {
+			$this->formContent($structure['self']);
+		}
+		if (isset($structure['relations'])) {
+			$this->formContent($structure['relations']);
+		}
+		return View::make('mitter::layouts.form', compact('structure', 'isDeleted', 'id', 'generatedFields'))->render().'';
+	}
 
-		return View::make('mitter::layouts.form', compact('structure', 'isDeleted', 'id', 'generatedFields'))->render();
+	public function __toString()
+	{
+		return $this->get();
 	}
 
 	private function getPreFixedAPI($api)
